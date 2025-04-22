@@ -4,7 +4,7 @@ import CustomNavbar from '@/pages/index/componets/CustomNavbar.vue'
 
 <template>
   <CustomNavbar />
-  <view class="index"></view>
+  <view class="index">nihao</view>
 </template>
 
 <style lang="scss">
