@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import CustomNavbar from '@/pages/index/componets/CustomNavbar.vue'
+import XtxSwiper from '@/components/XtxSwiper.vue'
 </script>
 
 <template>
   <CustomNavbar />
-  <view class="index">nihao</view>
+  <XtxSwiper />
+  <view class="index"></view>
 </template>
 
 <style lang="scss">
