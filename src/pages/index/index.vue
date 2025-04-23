@@ -41,7 +41,7 @@ const onRefresherrefresh = () => {
   // 重置猜你喜欢组件数据
   guessRef.value?.resetData()
   // 加载数据
-  Promise.all([getBannerData(), getCategoryData(), getHotData()])
+  Promise.all([getBannerData(), getCategoryData(), getHotData(), guessRef.value?.getMore()])
   // 关闭动画
   isTriggered.value = false
 }
