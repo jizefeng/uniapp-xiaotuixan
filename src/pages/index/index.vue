@@ -4,7 +4,7 @@ import XtxSwiper from '@/components/XtxSwiper.vue'
 import { getHomeBannerApi, getHomeCategoryApi } from '@/services/home.ts'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import type { BannerItem } from '@/types/home'
+import type { BannerItem, CategoryItem } from '@/types/home'
 import CategoryPanel from '@/pages/index/componets/CategoryPanel.vue'
 
 // 获取轮播图数据
@@ -14,8 +14,10 @@ const getBannerData = async () => {
   bannerList.value = res.result
 }
 // 获取前台分类数据
+const categoryList = ref<CategoryItem[]>([])
 const getCategoryData = async () => {
   const res = await getHomeCategoryApi()
+  categoryList.value = res.result
 }
 // 页面加载时获取数据
 onLoad(() => {
@@ -30,7 +32,7 @@ onLoad(() => {
   <!--  自定义轮播图-->
   <XtxSwiper :list="bannerList" />
   <!--  分类面板-->
-  <CategoryPanel />
+  <CategoryPanel :list="categoryList" />
   <view class="index"></view>
 </template>
 
