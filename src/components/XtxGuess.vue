@@ -2,16 +2,29 @@
 import { getHomeGoodsGuessLikeAPI } from '@/services/home.ts'
 import { onMounted, ref } from 'vue'
 import type { GuessItem } from '@/types/home'
+import type { PageParams } from '@/types/global'
 
+//分页参数
+const params: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
 //获取猜你喜欢数据
 const guessData = ref<GuessItem[]>([])
 const getHomeGoodsGuessLikeData = async () => {
-  const res = await getHomeGoodsGuessLikeAPI()
-  guessData.value = res.result.items
+  const res = await getHomeGoodsGuessLikeAPI(params)
+  // guessData.value = res.result.items
+  //数据追加
+  guessData.value.push(...res.result.items)
+  //页码累加
+  params.page++
 }
 
 onMounted(() => {
   getHomeGoodsGuessLikeData()
+})
+defineExpose({
+  getMore: getHomeGoodsGuessLikeData,
 })
 </script>
 
