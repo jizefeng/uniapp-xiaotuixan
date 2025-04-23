@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import CategoryPanel from '@/pages/index/componets/CategoryPanel.vue'
 import HotPanel from '@/pages/index/componets/HotPanel.vue'
+import XtxGuess from '@/components/XtxGuess.vue'
 
 // 获取轮播图数据
 const bannerList = ref<BannerItem[]>([])
@@ -37,17 +38,27 @@ onLoad(() => {
 <template>
   <!--  自定义导航栏-->
   <CustomNavbar />
-  <!--  自定义轮播图-->
-  <XtxSwiper :list="bannerList" />
-  <!--  分类面板-->
-  <CategoryPanel :list="categoryList" />
-  <!--  热门推荐-->
-  <HotPanel :list="hotList" />
-  <view class="index"></view>
+  <scroll-view scroll-y class="scroll-view">
+    <!--  自定义轮播图-->
+    <XtxSwiper :list="bannerList" />
+    <!--  分类面板-->
+    <CategoryPanel :list="categoryList" />
+    <!--  热门推荐-->
+    <HotPanel :list="hotList" />
+    <!--  猜你喜欢-->
+    <XtxGuess />
+  </scroll-view>
 </template>
 
 <style lang="scss">
 page {
   background-color: #f7f7f7;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .scroll-view {
+    flex: 1;
+  }
 }
 </style>
