@@ -33,6 +33,18 @@ const guessRef = ref<XtxGuessInstance>()
 const onScrolltolower = () => {
   guessRef.value?.getMore()
 }
+// 下拉刷新状态
+const isTriggered = ref(false)
+const onRefresherrefresh = () => {
+  // 开启动画
+  isTriggered.value = true
+  // 重置猜你喜欢组件数据
+  guessRef.value?.resetData()
+  // 加载数据
+  Promise.all([getBannerData(), getCategoryData(), getHotData()])
+  // 关闭动画
+  isTriggered.value = false
+}
 // 页面加载时获取数据
 onLoad(() => {
   getBannerData()
@@ -45,7 +57,14 @@ onLoad(() => {
   <!--  自定义导航栏-->
   <CustomNavbar />
   <!--  滚动容器-->
-  <scroll-view @scrolltolower="onScrolltolower" scroll-y class="scroll-view">
+  <scroll-view
+    refresher-enabled
+    @refresherrefresh="onRefresherrefresh"
+    :refresher-triggered="isTriggered"
+    @scrolltolower="onScrolltolower"
+    scroll-y
+    class="scroll-view"
+  >
     <!--  自定义轮播图-->
     <XtxSwiper :list="bannerList" />
     <!--  分类面板-->
