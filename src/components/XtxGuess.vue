@@ -9,15 +9,23 @@ const params: Required<PageParams> = {
   page: 1,
   pageSize: 10,
 }
+const finish = ref(false)
 //获取猜你喜欢数据
 const guessData = ref<GuessItem[]>([])
 const getHomeGoodsGuessLikeData = async () => {
+  if (finish.value) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
   const res = await getHomeGoodsGuessLikeAPI(params)
   // guessData.value = res.result.items
   //数据追加
   guessData.value.push(...res.result.items)
-  //页码累加
-  params.page++
+  if (params.page < res.result.pages) {
+    //页码累加
+    params.page++
+  } else {
+    finish.value = true
+  }
 }
 
 onMounted(() => {
@@ -48,7 +56,7 @@ defineExpose({
       </view>
     </navigator>
   </view>
-  <view class="loading-text"> 正在加载... </view>
+  <view class="loading-text">{{ finish ? '没有更多数据了~' : '加载更多' }} </view>
 </template>
 
 <style lang="scss">
