@@ -4,9 +4,10 @@
     "autoscan": true,
     "custom": {
       // uni-ui 规则如下配置  // [!code ++]
-      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue", // [!code ++]
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+      // [!code ++]
       // 以 Xtx 开头的组件，在 components 目录中查找
-//      "^Xtx(.*)": "@/components/Xtx$1.vue"
+      //      "^Xtx(.*)": "@/components/Xtx$1.vue"
     }
   },
   "pages": [
@@ -14,7 +15,8 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationStyle": "custom",// 隐藏默认导航
+        "navigationStyle": "custom",
+        // 隐藏默认导航
         "navigationBarTitleText": "首页",
         "navigationBarTextStyle": "white"
       }
@@ -41,6 +43,13 @@
       "path": "pages/login/login",
       "style": {
         "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/hot/hot",
+      "style": {
+        "navigationBarTitleText": "热门推荐",
+        "enablePullDownRefresh": false
       }
     }
   ],
