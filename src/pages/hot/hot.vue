@@ -2,6 +2,8 @@
 // 热门推荐页 标题和url
 import { getHotRecommendAPI } from '@/services/hot.ts'
 import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
+import type { SubTypeItem } from '@/types/hot'
 
 const hotMap = [
   { type: '1', title: '特惠推荐', url: '/hot/preference' },
@@ -17,10 +19,17 @@ const query = defineProps<{
 const crrHot = hotMap.find((v) => v.type === query.type)
 //动态设置标题
 uni.setNavigationBarTitle({ title: crrHot!.title })
+//推荐封面图
+const bannerPicture = ref(' ')
+// 推荐选项
+const subTypes = ref<SubTypeItem[]>([])
+// 高亮的下标
+const activateIndex = ref(0)
 //获取热门推荐数据
 const getHotRecommendData = async () => {
   const res = await getHotRecommendAPI(crrHot!.url)
-  console.log(res)
+  bannerPicture.value = res.result.bannerPicture
+  subTypes.value = res.result.subTypes
 }
 //页面加载时获取数据
 onLoad(() => {
@@ -32,33 +41,40 @@ onLoad(() => {
   <view class="viewport">
     <!-- 推荐封面图 -->
     <view class="cover">
-      <image
-        src="http://yjy-xiaotuxian-dev.oss-cn-beijing.aliyuncs.com/picture/2021-05-20/84abb5b1-8344-49ae-afc1-9cb932f3d593.jpg"
-      ></image>
+      <image :src="bannerPicture"></image>
     </view>
     <!-- 推荐选项 -->
     <view class="tabs">
-      <text class="text active">抢先尝鲜</text>
-      <text class="text">新品预告</text>
+      <text
+        v-for="(item, index) in subTypes"
+        :key="item.id"
+        :class="{ active: index === activateIndex }"
+        @tap="activateIndex = index"
+        class="text"
+        >{{ item.title }}</text
+      >
     </view>
     <!-- 推荐列表 -->
-    <scroll-view scroll-y class="scroll-view">
+    <scroll-view
+      v-for="(item, index) in subTypes"
+      :key="item.id"
+      v-show="activateIndex === index"
+      scroll-y
+      class="scroll-view"
+    >
       <view class="goods">
         <navigator
           hover-class="none"
           class="navigator"
-          v-for="goods in 10"
-          :key="goods"
-          :url="`/pages/goods/goods?id=`"
+          v-for="goods in item.goodsItems.items"
+          :key="goods.id"
+          :url="`/pages/goods/goods?id=${goods.id}`"
         >
-          <image
-            class="thumb"
-            src="https://yanxuan-item.nosdn.127.net/5e7864647286c7447eeee7f0025f8c11.png"
-          ></image>
-          <view class="name ellipsis">不含酒精，使用安心爽肤清洁湿巾</view>
+          <image class="thumb" :src="goods.picture"></image>
+          <view class="name ellipsis">{{ goods.name }}</view>
           <view class="price">
             <text class="symbol">¥</text>
-            <text class="number">29.90</text>
+            <text class="number">{{ goods.price }}</text>
           </view>
         </navigator>
       </view>
