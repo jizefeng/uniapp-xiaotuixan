@@ -9,6 +9,7 @@ import CategoryPanel from '@/pages/index/componets/CategoryPanel.vue'
 import HotPanel from '@/pages/index/componets/HotPanel.vue'
 import XtxGuess from '@/components/XtxGuess.vue'
 import type { XtxGuessInstance } from '@/types/component'
+import PageSkeleton from '@/pages/index/componets/PageSkeleton.vue'
 
 // 获取轮播图数据
 const bannerList = ref<BannerItem[]>([])
@@ -45,11 +46,13 @@ const onRefresherrefresh = () => {
   // 关闭动画
   isTriggered.value = false
 }
+// 加载中标记
+const isLoading = ref(false)
 // 页面加载时获取数据
 onLoad(() => {
-  getBannerData()
-  getCategoryData()
-  getHotData()
+  isLoading.value = true
+  Promise.all([getBannerData(), getCategoryData(), getHotData()])
+  isLoading.value = false
 })
 </script>
 
@@ -65,14 +68,17 @@ onLoad(() => {
     scroll-y
     class="scroll-view"
   >
-    <!--  自定义轮播图-->
-    <XtxSwiper :list="bannerList" />
-    <!--  分类面板-->
-    <CategoryPanel :list="categoryList" />
-    <!--  热门推荐-->
-    <HotPanel :list="hotList" />
-    <!--  猜你喜欢-->
-    <XtxGuess ref="guessRef" />
+    <PageSkeleton v-if="isLoading" />
+    <template v-else>
+      <!--  自定义轮播图-->
+      <XtxSwiper :list="bannerList" />
+      <!--  分类面板-->
+      <CategoryPanel :list="categoryList" />
+      <!--  热门推荐-->
+      <HotPanel :list="hotList" />
+      <!--  猜你喜欢-->
+      <XtxGuess ref="guessRef" />
+    </template>
   </scroll-view>
 </template>
 
