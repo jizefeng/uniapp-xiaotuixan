@@ -49,9 +49,9 @@ const onRefresherrefresh = () => {
 // 加载中标记
 const isLoading = ref(false)
 // 页面加载时获取数据
-onLoad(() => {
+onLoad(async () => {
   isLoading.value = true
-  Promise.all([getBannerData(), getCategoryData(), getHotData()])
+  await Promise.all([getBannerData(), getCategoryData(), getHotData()])
   isLoading.value = false
 })
 </script>

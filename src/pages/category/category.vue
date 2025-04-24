@@ -6,6 +6,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import XtxSwiper from '@/components/XtxSwiper.vue'
 import { getCategoryTopAPI } from '@/services/category.ts'
 import type { CategoryTopItem } from '@/types/category'
+import CategoryKkeleton from '@/pages/category/componets/CategoryKkeleton.vue'
 
 // 轮播图列表
 const bannerList = ref<BannerItem[]>([])
@@ -23,19 +24,21 @@ const getCategoryTopData = async () => {
   const res = await getCategoryTopAPI()
   categoryList.value = res.result
 }
-// 动态计算 二级分类数据
+// 基于高亮下标 动态计算 二级分类数据
 const subCategoryList = computed(() => {
   return categoryList.value[activeIndex.value]?.children || []
 })
+// 是否加载完毕
+const isFinish = ref(false)
 // 页面加载时获取数据
-onLoad(() => {
-  getBannerData()
-  getCategoryTopData()
+onLoad(async () => {
+  await Promise.all([getBannerData(), getCategoryTopData()])
+  isFinish.value = true
 })
 </script>
 
 <template>
-  <view class="viewport">
+  <view class="viewport" v-if="isFinish">
     <!-- 搜索框 -->
     <view class="search">
       <view class="input">
@@ -86,6 +89,7 @@ onLoad(() => {
       </scroll-view>
     </view>
   </view>
+  <CategoryKkeleton v-else />
 </template>
 
 <style lang="scss">
