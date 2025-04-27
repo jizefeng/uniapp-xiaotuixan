@@ -8,8 +8,8 @@ import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import CategoryPanel from '@/pages/index/componets/CategoryPanel.vue'
 import HotPanel from '@/pages/index/componets/HotPanel.vue'
 import XtxGuess from '@/components/XtxGuess.vue'
-import type { XtxGuessInstance } from '@/types/component'
 import PageSkeleton from '@/pages/index/componets/PageSkeleton.vue'
+import { useGuessList } from '@/composables'
 
 // 获取轮播图数据
 const bannerList = ref<BannerItem[]>([])
@@ -29,11 +29,8 @@ const getHotData = async () => {
   const res = await getHomeHotAPI()
   hotList.value = res.result
 }
-
-const guessRef = ref<XtxGuessInstance>()
-const onScrolltolower = () => {
-  guessRef.value?.getMore()
-}
+// 获取猜你喜欢数据
+const { guessRef, onScrollToLower } = useGuessList()
 // 下拉刷新状态
 const isTriggered = ref(false)
 const onRefresherrefresh = () => {
@@ -64,7 +61,7 @@ onLoad(async () => {
     refresher-enabled
     @refresherrefresh="onRefresherrefresh"
     :refresher-triggered="isTriggered"
-    @scrolltolower="onScrolltolower"
+    @scrolltolower="onScrollToLower"
     scroll-y
     class="scroll-view"
   >
