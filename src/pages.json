@@ -104,11 +104,12 @@
   // 分包加载规则
   "subPackages": [
     {
-      // 分包根目录
+      // 子包的根目录
       "root": "pagesMember",
+      // 页面路径和窗口表现
       "pages": [
         {
-          "path": "setting/setting",
+          "path": "settings/settings",
           "style": {
             "navigationBarTitleText": "设置"
           }
@@ -116,7 +117,7 @@
       ]
     }
   ],
-  //分包预下载规则
+  // 分包预下载规则
   "preloadRule": {
     "pages/my/my": {
       "network": "all",
