@@ -12,6 +12,34 @@ const getMemberProfileData = async () => {
   const res = await getMemberProfileAPI()
   memberProfile.value = res.result
 }
+// 修改头像
+const onAvatarChange = () => {
+  uni.chooseMedia({
+    //  最多选择一张图片
+    count: 1,
+    mediaType: ['image'],
+    success(result) {
+      // 本地路径
+      const { tempFilePath } = result.tempFiles[0]
+      console.log(tempFilePath)
+      //文件上传
+      uni.uploadFile({
+        url: '/member/profile/avatar',
+        filePath: tempFilePath,
+        success(result) {
+          if (result.statusCode === 200) {
+            // 提取头像
+            const avatar = JSON.parse(result.data).result.avatar
+            memberProfile.value!.avatar = avatar
+            uni.showToast({ icon: 'success', title: '修改成功' })
+          } else {
+            uni.showToast({ icon: 'error', title: '修改失败' })
+          }
+        },
+      })
+    },
+  })
+}
 //页面加载时
 onLoad(() => {
   getMemberProfileData()
@@ -28,8 +56,8 @@ onLoad(() => {
     <!-- 头像 -->
     <view class="avatar">
       <view class="avatar-content">
-        <image class="image" :src="memberProfile?.avatar" mode="aspectFill" />
-        <text class="text">点击修改头像</text>
+        <image @tap="onAvatarChange" class="image" :src="memberProfile?.avatar" mode="aspectFill" />
+        <text @tap="onAvatarChange" class="text">点击修改头像</text>
       </view>
     </view>
     <!-- 表单 -->
@@ -211,6 +239,7 @@ page {
     .picker {
       flex: 1;
     }
+
     .placeholder {
       color: #808080;
     }
