@@ -57,17 +57,28 @@ const onGenderChange: UniHelper.RadioGroupOnChange = (en) => {
 }
 // 修改生日
 const onBirthdayChange: UniHelper.DatePickerOnChange = (en) => {
-  console.log(en.detail.value)
   memberProfile.value.birthday = en.detail.value
+}
+//  修改城市
+let fullLocationCode: string[] = []
+const onFullLocationChange: UniHelper.RegionPickerOnChange = (ev) => {
+  // 修改前端界面
+  memberProfile.value.fullLocation = ev.detail.value.join(' ')
+  // 提交后端更新
+  fullLocationCode = ev.detail.code!
 }
 //  提交修改
 const onSubmit = async () => {
-  const { nickname, gender, birthday } = memberProfile.value
+  const { nickname, gender, birthday, profession } = memberProfile.value
   // 修改个人信息
   const result = await putMemberProfileAPI({
     nickname,
     gender,
     birthday,
+    profession,
+    provinceCode: fullLocationCode[0] || undefined,
+    cityCode: fullLocationCode[1] || undefined,
+    countyCode: fullLocationCode[2] || undefined,
   })
   memberStore.profile!.nickname = result.result.nickname
   await uni.showToast({ icon: 'success', title: '修改成功' })
@@ -141,7 +152,12 @@ onLoad(() => {
         </view>
         <view class="form-item">
           <text class="label">城市</text>
-          <picker class="picker" mode="region" :value="memberProfile?.fullLocation?.split(' ')">
+          <picker
+            class="picker"
+            mode="region"
+            :value="memberProfile?.fullLocation?.split(' ')"
+            @change="onFullLocationChange"
+          >
             <view v-if="memberProfile?.fullLocation">{{ memberProfile?.fullLocation }}</view>
             <view class="placeholder" v-else>请选择城市</view>
           </picker>
@@ -152,7 +168,7 @@ onLoad(() => {
             class="input"
             type="text"
             placeholder="请填写职业"
-            :value="memberProfile?.profession"
+            v-model="memberProfile!.profession"
           />
         </view>
       </view>
