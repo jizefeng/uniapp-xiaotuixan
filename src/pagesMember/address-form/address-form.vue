@@ -41,12 +41,55 @@ const onSwitchChange: UniHelper.SwitchOnChange = (en) => {
   form.value.isDefault = en.detail.value ? 1 : 0
 }
 // 提交表单
+const isLoading = ref(false)
 const onSubmit = async () => {
-  await postMemberAddressAPI(form.value)
-  await uni.showToast({ icon: 'success', title: '保存成功' })
-  setTimeout(() => {
-    uni.navigateBack()
-  }, 400)
+  try {
+    // 1. 添加加载状态
+    if (isLoading.value) return // 防止重复提交
+    isLoading.value = true
+    // 2. 添加表单验证
+    // if (!validateForm(form.value)) {
+    //   await uni.showToast({
+    //     icon: 'none',
+    //     title: '请填写完整表单信息',
+    //     duration: 2000
+    //   })
+    //   return
+    // }
+    // 3. 优化API调用和错误处理
+    const response = await postMemberAddressAPI(form.value)
+
+    // 4. 检查API响应是否成功
+    if (response.code !== 200) {
+      throw new Error(response.msg || '保存失败')
+    }
+
+    // 5. 优化用户反馈
+    await uni.showToast({
+      icon: 'success',
+      title: '保存成功',
+      duration: 1500,
+    })
+
+    // 6. 使用更精确的导航返回
+    setTimeout(() => {
+      const pages = getCurrentPages()
+      if (pages.length > 1) {
+        uni.navigateBack({ delta: 1 })
+      } else {
+        uni.switchTab({ url: '/pages/my/my' }) // 备用方案
+      }
+    }, 1500)
+  } catch (error: any) {
+    console.error('提交失败:', error)
+    await uni.showToast({
+      icon: 'error',
+      title: error.message || '保存失败，请重试',
+      duration: 2000,
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 

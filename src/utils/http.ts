@@ -56,7 +56,7 @@ uni.addInterceptor('uploadFile', interceptors)
  *    3.3 网络错误 -> 提示用户换网络
  */
 interface Data<T> {
-  code: string
+  code: number
   msg: string
   result: T
 }
