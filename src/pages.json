@@ -121,6 +121,19 @@
             "enablePullDownRefresh": false,
             "navigationStyle": "custom"
           }
+        },
+        {
+          "path": "address/address",
+          "style": {
+            "navigationBarTitleText": "地址管理",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
+          "path": "address-form/address-form",
+          "style": {
+            "enablePullDownRefresh": false
+          }
         }
       ]
     }
