@@ -51,22 +51,29 @@ const onAvatarChange = () => {
     },
   })
 }
+// 修改性别
+const onGenderChange: UniHelper.RadioGroupOnChange = (en) => {
+  memberProfile.value.gender = en.detail.value as Gender
+}
+// 修改生日
+const onBirthdayChange: UniHelper.DatePickerOnChange = (en) => {
+  console.log(en.detail.value)
+  memberProfile.value.birthday = en.detail.value
+}
 //  提交修改
 const onSubmit = async () => {
+  const { nickname, gender, birthday } = memberProfile.value
   // 修改个人信息
   const result = await putMemberProfileAPI({
-    nickname: memberProfile.value.nickname,
-    gender: memberProfile.value.gender,
+    nickname,
+    gender,
+    birthday,
   })
   memberStore.profile!.nickname = result.result.nickname
   await uni.showToast({ icon: 'success', title: '修改成功' })
   setTimeout(() => {
     uni.navigateBack()
   }, 400)
-}
-// 修改性别
-const onGenderChange: UniHelper.RadioGroupOnChange = (en) => {
-  memberProfile.value.gender = en.detail.value as Gender
 }
 //页面加载时
 onLoad(() => {
@@ -126,6 +133,7 @@ onLoad(() => {
             start="1900-01-01"
             :end="new Date()"
             :value="memberProfile?.birthday"
+            @change="onBirthdayChange"
           >
             <view v-if="memberProfile?.birthday">{{ memberProfile.birthday }}</view>
             <view class="placeholder" v-else>请选择日期</view>
