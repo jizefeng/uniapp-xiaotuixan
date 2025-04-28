@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { getMemberProfileAPI } from '@/services/profile.ts'
+import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile.ts'
 import type { ProfileDetail } from '@/types/member'
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { useMemberStore } from '@/stores'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-// 获取用户信息
-const memberProfile = ref<ProfileDetail>()
+// 获取用户信息 修改用户信息初始化
+const memberProfile = ref<ProfileDetail>({} as ProfileDetail)
 const getMemberProfileData = async () => {
   const res = await getMemberProfileAPI()
   memberProfile.value = res.result
 }
+// 用户信息store
+const memberStore = useMemberStore()
 // 修改头像
 const onAvatarChange = () => {
   uni.chooseMedia({
@@ -21,6 +24,11 @@ const onAvatarChange = () => {
     success(result) {
       // 本地路径
       const { tempFilePath } = result.tempFiles[0]
+      if (!tempFilePath) {
+        uni.showToast({ icon: 'error', title: '请选择图片' })
+        return
+      }
+      memberProfile.value!.avatar = tempFilePath
       console.log(tempFilePath)
       //文件上传
       uni.uploadFile({
@@ -30,7 +38,10 @@ const onAvatarChange = () => {
           if (result.statusCode === 200) {
             // 提取头像
             const avatar = JSON.parse(result.data).result.avatar
+            // 修改个人信息头像
             memberProfile.value!.avatar = avatar
+            // 修改store头像
+            memberStore.profile!.avatar = avatar
             uni.showToast({ icon: 'success', title: '修改成功' })
           } else {
             uni.showToast({ icon: 'error', title: '修改失败' })
@@ -39,6 +50,16 @@ const onAvatarChange = () => {
       })
     },
   })
+}
+//  提交修改
+const onSubmit = async () => {
+  // 修改个人信息
+  const result = await putMemberProfileAPI({ nickname: memberProfile.value.nickname })
+  memberStore.profile!.nickname = result.result.nickname
+  await uni.showToast({ icon: 'success', title: '修改成功' })
+  setTimeout(() => {
+    uni.navigateBack()
+  }, 400)
 }
 //页面加载时
 onLoad(() => {
@@ -74,7 +95,7 @@ onLoad(() => {
             class="input"
             type="text"
             placeholder="请填写昵称"
-            :value="memberProfile?.nickname"
+            v-model="memberProfile!.nickname"
           />
         </view>
         <view class="form-item">
@@ -121,7 +142,7 @@ onLoad(() => {
         </view>
       </view>
       <!-- 提交按钮 -->
-      <button class="form-button">保 存</button>
+      <button @tap="onSubmit" class="form-button">保 存</button>
     </view>
   </view>
 </template>
