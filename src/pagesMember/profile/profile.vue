@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile.ts'
-import type { ProfileDetail } from '@/types/member'
+import type { Gender, ProfileDetail } from '@/types/member'
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useMemberStore } from '@/stores'
@@ -54,12 +54,19 @@ const onAvatarChange = () => {
 //  提交修改
 const onSubmit = async () => {
   // 修改个人信息
-  const result = await putMemberProfileAPI({ nickname: memberProfile.value.nickname })
+  const result = await putMemberProfileAPI({
+    nickname: memberProfile.value.nickname,
+    gender: memberProfile.value.gender,
+  })
   memberStore.profile!.nickname = result.result.nickname
   await uni.showToast({ icon: 'success', title: '修改成功' })
   setTimeout(() => {
     uni.navigateBack()
   }, 400)
+}
+// 修改性别
+const onGenderChange: UniHelper.RadioGroupOnChange = (en) => {
+  memberProfile.value.gender = en.detail.value as Gender
 }
 //页面加载时
 onLoad(() => {
@@ -100,13 +107,13 @@ onLoad(() => {
         </view>
         <view class="form-item">
           <text class="label">性别</text>
-          <radio-group>
+          <radio-group @change="onGenderChange">
             <label class="radio">
-              <radio value="男" color="#27ba9b" :checked="memberProfile?.gender === '男'" />
+              <radio value="男" color="#27ba9b" :checked="memberProfile.gender === '男'" />
               男
             </label>
             <label class="radio">
-              <radio value="女" color="#27ba9b" :checked="memberProfile?.gender === '女'" />
+              <radio value="女" color="#27ba9b" :checked="memberProfile.gender === '女'" />
               女
             </label>
           </radio-group>
