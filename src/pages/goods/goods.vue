@@ -3,24 +3,64 @@
 import { getGoodsByIdAPI } from '@/services/goods.ts'
 import { onLoad } from '@dcloudio/uni-app'
 import type { GoodsResult } from '@/types/goods'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AddressPanel from '@/pages/goods/components/AddressPanel.vue'
 import ServicePanel from '@/pages/goods/components/ServicePanel.vue'
+import type {
+  SkuPopupInstanceType,
+  SkuPopupLocaldata,
+} from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
 //接受页面参数
 const query = defineProps<{
   id: string
 }>()
-// 获取商品详情数据
-const goodsData = ref<GoodsResult>()
+// 获取商品详情信息
+const goods = ref<GoodsResult>()
+// 商品信息
+const localdata = ref({} as SkuPopupLocaldata)
 const getGoodsByIdData = async () => {
   const res = await getGoodsByIdAPI(query.id)
-  goodsData.value = res.result
+  goods.value = res.result
+  // SKU组件所需格式
+  localdata.value = {
+    _id: res.result.id,
+    name: res.result.name,
+    goods_thumb: res.result.mainPictures[0],
+    spec_list: res.result.specs.map((v) => ({ name: v.name, list: v.values })),
+    sku_list: res.result.skus.map((v) => ({
+      _id: v.id,
+      goods_id: res.result.id,
+      goods_name: res.result.name,
+      image: v.picture,
+      price: v.price * 100, // 注意：需要乘以 100
+      stock: v.inventory,
+      sku_name_arr: v.specs.map((vv) => vv.valueName),
+    })),
+  }
 }
-// 页面加载时
-onLoad(() => {
-  getGoodsByIdData()
+// 是否显示SKU组件
+const isShowSku = ref(false)
+// 按钮模式
+enum SkuMode {
+  Both = 1,
+  Cart = 2,
+  Buy = 3,
+}
+const mode = ref<SkuMode>(SkuMode.Cart)
+// 打开SKU弹窗修改按钮模式
+const openSkuPopup = (val: SkuMode) => {
+  // 显示SKU弹窗
+  isShowSku.value = true
+  // 修改按钮模式
+  mode.value = val
+}
+// SKU组件实例
+const skuPopupRef = ref<SkuPopupInstanceType>()
+// 计算被选中的值
+const selectArrText = computed(() => {
+  return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
 })
 //轮播图变化时
 const currentIndex = ref(0)
@@ -31,7 +71,7 @@ const onChange: UniHelper.SwiperOnChange = (ev) => {
 const onTapImage = (url: string) => {
   uni.previewImage({
     current: url,
-    urls: goodsData.value?.mainPictures || [],
+    urls: goods.value?.mainPictures || [],
   })
 }
 //uni-ui弹出层组件 ref
@@ -47,23 +87,41 @@ const openPopup = (name: typeof popupName.value) => {
   //打开弹出层
   popup.value?.open()
 }
+// 页面加载时
+onLoad(() => {
+  getGoodsByIdData()
+})
 </script>
 
 <template>
+  <!-- SKU弹窗组件 -->
+  <vk-data-goods-sku-popup
+    v-model="isShowSku"
+    :localdata="localdata"
+    :mode="mode"
+    add-cart-background-color="#FFA868"
+    buy-now-background-color="#27BA9B"
+    ref="skuPopupRef"
+    :actived-style="{
+      color: '#27BA9B',
+      borderColor: '#27BA9B',
+      backgroundColor: '#E9F8F5',
+    }"
+  />
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
     <view class="goods">
       <!-- 商品主图 -->
       <view class="preview">
         <swiper circular @change="onChange">
-          <swiper-item v-for="item in goodsData?.mainPictures" :key="item">
+          <swiper-item v-for="item in goods?.mainPictures" :key="item">
             <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
           </swiper-item>
         </swiper>
         <view class="indicator">
           <text class="current">{{ currentIndex + 1 }}</text>
           <text class="split">/</text>
-          <text class="total">{{ goodsData?.mainPictures.length }}</text>
+          <text class="total">{{ goods?.mainPictures.length }}</text>
         </view>
       </view>
 
@@ -71,18 +129,19 @@ const openPopup = (name: typeof popupName.value) => {
       <view class="meta">
         <view class="price">
           <text class="symbol">¥</text>
-          <text class="number">{{ goodsData?.price }}</text>
+          <text class="number">{{ goods?.price }}</text>
         </view>
-        <view class="name ellipsis">{{ goodsData?.name }}</view>
-        <view class="desc"> {{ goodsData?.desc }}</view>
+        <view class="name ellipsis">{{ goods?.name }}</view>
+        <view class="desc"> {{ goods?.desc }}</view>
       </view>
 
       <!-- 操作面板 -->
       <view class="action">
-        <view class="item arrow">
+        <view @tap="openSkuPopup(SkuMode.Both)" class="item arrow">
           <text class="label">选择</text>
           <text class="text ellipsis"> 请选择商品规格</text>
         </view>
+
         <view @tap="openPopup('address')" class="item arrow">
           <text class="label">送至</text>
           <text class="text ellipsis"> 请选择收获地址</text>
@@ -108,13 +167,13 @@ const openPopup = (name: typeof popupName.value) => {
       <view class="content">
         <view class="properties">
           <!-- 属性详情 -->
-          <view class="item" v-for="item in goodsData?.details.properties" :key="item.name">
+          <view class="item" v-for="item in goods?.details.properties" :key="item.name">
             <text class="label">{{ item.name }}</text>
             <text class="value">{{ item.value }}</text>
           </view>
         </view>
         <!-- 图片详情 -->
-        <image v-for="item in goodsData?.details.pictures" :key="item" mode="widthFix" :src="item">
+        <image v-for="item in goods?.details.pictures" :key="item" mode="widthFix" :src="item">
         </image>
       </view>
     </view>
@@ -126,7 +185,7 @@ const openPopup = (name: typeof popupName.value) => {
       </view>
       <view class="content">
         <navigator
-          v-for="item in goodsData?.similarProducts"
+          v-for="item in goods?.similarProducts"
           :key="item.id"
           class="goods"
           hover-class="none"
@@ -160,8 +219,9 @@ const openPopup = (name: typeof popupName.value) => {
       </navigator>
     </view>
     <view class="buttons">
-      <view class="addcart"> 加入购物车</view>
-      <view class="buynow"> 立即购买</view>
+      <!-- 显示一个按钮 -->
+      <view @tap="openSkuPopup(SkuMode.Cart)" class="addcart"> 加入购物车 </view>
+      <view @tap="openSkuPopup(SkuMode.Buy)" class="payment"> 立即购买 </view>
     </view>
   </view>
 </template>
