@@ -30,6 +30,26 @@ const form = ref({
 const query = defineProps<{
   id?: string
 }>()
+// 表单验证规则
+const rules: UniHelper.UniFormsRules = {
+  receiver: {
+    rules: [{ required: true, errorMessage: '请输入收货人姓名' }],
+  },
+  contact: {
+    rules: [
+      { required: true, errorMessage: '请输入联系方式' },
+      { pattern: /^1[3-9]\d{9}$/, errorMessage: '请输入正确的手机号码' },
+    ],
+  },
+  fullLocation: {
+    rules: [{ required: true, errorMessage: '请选择所在地区' }],
+  },
+  address: {
+    rules: [{ required: true, errorMessage: '请输入详细地址' }],
+  },
+}
+// 获取表单组件实例，用于调用表单方法
+const formRef = ref<UniHelper.UniFormsInstance>()
 //动态设置标题
 uni.setNavigationBarTitle({ title: query.id ? '修改地址' : '新增地址' })
 // 收集所在地区
@@ -49,6 +69,8 @@ const onSwitchChange: UniHelper.SwitchOnChange = (en) => {
 const isLoading = ref(false)
 const onSubmit = async () => {
   try {
+    // 表单验证
+    await formRef.value?.validate?.()
     // 1. 添加加载状态
     if (isLoading.value) return // 防止重复提交
     isLoading.value = true
@@ -76,7 +98,6 @@ const onSubmit = async () => {
     // if (response.code !== 200) {
     //   throw new Error(response.msg || '保存失败')
     // }
-
     // 5. 优化
     await uni.showToast({
       icon: 'success',
@@ -121,17 +142,17 @@ onLoad(() => {
 
 <template>
   <view class="content">
-    <form>
+    <uni-forms :rules="rules" :model="form" ref="formRef">
       <!-- 表单内容 -->
-      <view class="form-item">
+      <uni-forms-item name="receiver" class="form-item">
         <text class="label">收货人</text>
         <input class="input" placeholder="请填写收货人姓名" v-model="form.receiver" />
-      </view>
-      <view class="form-item">
+      </uni-forms-item>
+      <uni-forms-item name="contact" class="form-item">
         <text class="label">手机号码</text>
         <input class="input" placeholder="请填写收货人手机号码" v-model="form.contact" />
-      </view>
-      <view class="form-item">
+      </uni-forms-item>
+      <uni-forms-item name="fullLocation" class="form-item">
         <text class="label">所在地区</text>
         <picker
           class="picker"
@@ -142,11 +163,11 @@ onLoad(() => {
           <view v-if="form.fullLocation">广东省 广州市 天河区</view>
           <view v-else class="placeholder">请选择省/市/区(县)</view>
         </picker>
-      </view>
-      <view class="form-item">
+      </uni-forms-item>
+      <uni-forms-item name="address" class="form-item">
         <text class="label">详细地址</text>
         <input class="input" placeholder="街道、楼牌号等信息" v-model="form.address" />
-      </view>
+      </uni-forms-item>
       <view class="form-item">
         <label class="label">设为默认地址</label>
         <switch
@@ -156,7 +177,7 @@ onLoad(() => {
           @change="onSwitchChange"
         />
       </view>
-    </form>
+    </uni-forms>
   </view>
   <!-- 提交按钮 -->
   <button class="button" @tap="onSubmit">保存并使用</button>
