@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getMemberAddressByIdAPI, postMemberAddressAPI } from '@/services/address.ts'
+import {
+  getMemberAddressByIdAPI,
+  postMemberAddressAPI,
+  putMemberAddressByIdAPI,
+} from '@/services/address.ts'
 import { onLoad } from '@dcloudio/uni-app'
 
 // 表单数据
@@ -48,6 +52,14 @@ const onSubmit = async () => {
     // 1. 添加加载状态
     if (isLoading.value) return // 防止重复提交
     isLoading.value = true
+    // 判断当前页面是否有地址 id
+    if (query.id) {
+      // 修改地址请求
+      await putMemberAddressByIdAPI(query.id, form.value)
+    } else {
+      // 新建地址请求
+      await postMemberAddressAPI(form.value)
+    }
     // 2. 添加表单验证
     // if (!validateForm(form.value)) {
     //   await uni.showToast({
@@ -58,7 +70,7 @@ const onSubmit = async () => {
     //   return
     // }
     // 3. 优化API调用和错误处理
-    const response = await postMemberAddressAPI(form.value)
+    // const response = await postMemberAddressAPI(form.value)
 
     // 4. 检查API响应是否成功
     // if (response.code !== 200) {
@@ -68,7 +80,7 @@ const onSubmit = async () => {
     // 5. 优化
     await uni.showToast({
       icon: 'success',
-      title: '保存成功',
+      title: query.id ? '修改成功' : '保存成功',
       duration: 1500,
     })
 
