@@ -10,6 +10,7 @@ const getMemberAddressData = async () => {
   const result = await getMemberAddressAPI()
   addressList.value = result.result
 }
+
 // 初始化调用(页面显示)
 onShow(() => {
   getMemberAddressData()
