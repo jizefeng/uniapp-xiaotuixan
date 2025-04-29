@@ -60,11 +60,11 @@ const onSubmit = async () => {
     const response = await postMemberAddressAPI(form.value)
 
     // 4. 检查API响应是否成功
-    if (response.code !== 200) {
-      throw new Error(response.msg || '保存失败')
-    }
+    // if (response.code !== 200) {
+    //   throw new Error(response.msg || '保存失败')
+    // }
 
-    // 5. 优化用户反馈
+    // 5. 优化
     await uni.showToast({
       icon: 'success',
       title: '保存成功',
