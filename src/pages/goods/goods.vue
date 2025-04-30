@@ -7,9 +7,11 @@ import { computed, ref } from 'vue'
 import AddressPanel from '@/pages/goods/components/AddressPanel.vue'
 import ServicePanel from '@/pages/goods/components/ServicePanel.vue'
 import type {
+  SkuPopupEvent,
   SkuPopupInstanceType,
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
+import { postMemberCartAPI } from '@/services/cart.ts'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
 //接受页面参数
@@ -91,6 +93,15 @@ const openPopup = (name: typeof popupName.value) => {
 onLoad(() => {
   getGoodsByIdData()
 })
+// 点击加入购物车
+const onAddCart = async (en: SkuPopupEvent) => {
+  await postMemberCartAPI({ skuId: en._id, count: en.buy_num })
+  await uni.showToast({
+    title: '加入购物车成功',
+    icon: 'success',
+  })
+  isShowSku.value = false
+}
 </script>
 
 <template>
@@ -107,6 +118,7 @@ onLoad(() => {
       borderColor: '#27BA9B',
       backgroundColor: '#E9F8F5',
     }"
+    @add-cart="onAddCart"
   />
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
@@ -139,7 +151,7 @@ onLoad(() => {
       <view class="action">
         <view @tap="openSkuPopup(SkuMode.Both)" class="item arrow">
           <text class="label">选择</text>
-          <text class="text ellipsis"> 请选择商品规格</text>
+          <text class="text ellipsis"> {{ selectArrText }} </text>
         </view>
 
         <view @tap="openPopup('address')" class="item arrow">
