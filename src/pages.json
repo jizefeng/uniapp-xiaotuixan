@@ -66,6 +66,13 @@
         "navigationBarTitleText": "商品详情",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path": "pagesOrder/create/create",
+      "style": {
+        "navigationBarTitleText": "填写订单",
+        "enablePullDownRefresh": false
+      }
     }
   ],
   "globalStyle": {
