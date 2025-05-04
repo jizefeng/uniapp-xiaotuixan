@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
-import { getMemberOrderPreAPI } from '@/services/order.ts'
+import { getMemberOrderPreAPI, getMemberOrderPreNowAPI } from '@/services/order.ts'
 import type { OrderPreResult } from '@/types/order'
 import { useAddressStore } from '@/stores/modules/address.ts'
 
@@ -23,11 +23,27 @@ const activeDelivery = computed(() => deliveryList.value[activeIndex.value])
 const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
   activeIndex.value = ev.detail.value
 }
+//接受订单参数
+const query = defineProps<{
+  skuId?: string
+  count?: string
+}>()
 //获取预付订单数据
 const orderPre = ref<OrderPreResult>()
 const getMemberOrderPreData = async () => {
-  const result = await getMemberOrderPreAPI()
-  orderPre.value = result.result
+  // 是否有立即购买参数
+  if (query.skuId && query.count) {
+    // 调用立即购买 API
+    const result = await getMemberOrderPreNowAPI({
+      count: query.count,
+      skuId: query.skuId,
+    })
+    orderPre.value = result.result
+  } else {
+    // 调用预付订单 API
+    const result = await getMemberOrderPreAPI()
+    orderPre.value = result.result
+  }
 }
 onLoad(() => {
   getMemberOrderPreData()
