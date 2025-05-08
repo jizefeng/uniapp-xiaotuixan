@@ -78,7 +78,8 @@
       "path": "pagesOrder/detail/detail",
       "style": {
         "navigationBarTitleText": "订单详情",
-        "enablePullDownRefresh": false
+        "enablePullDownRefresh": false,
+        "navigationStyle": "custom"
       }
     }
   ],

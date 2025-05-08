@@ -11,6 +11,7 @@ import {
 import { onShow } from '@dcloudio/uni-app'
 import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
 import XtxGuess from '@/components/XtxGuess.vue'
+import { useGuessList } from '@/composables'
 
 // 获取会员Store
 const memberStore = useMemberStore()
@@ -20,6 +21,8 @@ const getMemberCartData = async () => {
   const result = await getMemberCartAPI()
   cartList.value = result.result
 }
+// 猜你喜欢
+const { guessRef, onScrollToLower } = useGuessList()
 // 初始化调用: 页面显示触发
 onShow(() => {
   // 用户已登录才允许调用
@@ -93,7 +96,7 @@ const gotoPayment = () => {
 </script>
 
 <template>
-  <scroll-view scroll-y class="scroll-view">
+  <scroll-view scroll-y class="scroll-view" @scrolltolower="onScrollToLower">
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
