@@ -2,8 +2,10 @@
 import { useGuessList } from '@/composables'
 import { ref } from 'vue'
 import XtxGuess from '@/components/XtxGuess.vue'
-import PageSkeleton from '@/pages/index/componets/PageSkeleton.vue'
-import { onReady } from '@dcloudio/uni-app'
+import { onLoad, onReady } from '@dcloudio/uni-app'
+import { type OrderResult, OrderState, orderStateList } from '@/types/order.d'
+import { getMemberOrderByIdAPI } from '@/services/order.ts'
+import DetailSkeleton from '@/pagesOrder/detail/componets/DetailSkeleton.vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 猜你喜欢
@@ -63,6 +65,16 @@ onReady(() => {
     endScrollOffset: 50,
   })
 })
+// 获取订单详情数据
+const order = ref<OrderResult>()
+const getOrderByIdData = async () => {
+  const result = await getMemberOrderByIdAPI(query.id)
+  order.value = result.result
+  console.log(order.value)
+}
+onLoad(() => {
+  getOrderByIdData()
+})
 </script>
 
 <template>
@@ -80,12 +92,12 @@ onReady(() => {
     </view>
   </view>
   <scroll-view scroll-y class="viewport" id="scroller" @scrolltolower="onScrollToLower">
-    <template v-if="true">
+    <template v-if="order">
       <!-- 订单状态 -->
       <view class="overview" :style="{ paddingTop: safeAreaInsets!.top + 20 + 'px' }">
         <!-- 待付款状态:展示去支付按钮和倒计时 -->
-        <template v-if="true">
-          <view class="status icon-clock">等待付款</view>
+        <template v-if="order.orderState == OrderState.DaiFuKuan">
+          <view class="status icon-clock"> 待付款 </view>
           <view class="tips">
             <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
@@ -96,7 +108,7 @@ onReady(() => {
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
           <!-- 订单状态文字 -->
-          <view class="status"> 待付款 </view>
+          <view class="status"> {{ orderStateList[order.orderState].text }} </view>
           <view class="button-group">
             <navigator
               class="button"
@@ -217,7 +229,7 @@ onReady(() => {
     </template>
     <template v-else>
       <!-- 骨架屏组件 -->
-      <PageSkeleton />
+      <DetailSkeleton />
     </template>
   </scroll-view>
   <!-- 取消订单弹窗 -->
