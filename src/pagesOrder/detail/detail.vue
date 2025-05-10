@@ -70,11 +70,14 @@ const order = ref<OrderResult>()
 const getOrderByIdData = async () => {
   const result = await getMemberOrderByIdAPI(query.id)
   order.value = result.result
-  console.log(order.value)
 }
 onLoad(() => {
   getOrderByIdData()
 })
+// 倒计时结束事件
+const onTimeUp = () => {
+  order.value!.orderState = OrderState.YiQuXiao
+}
 </script>
 
 <template>
@@ -101,7 +104,14 @@ onLoad(() => {
           <view class="tips">
             <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
-            00 时 29 分 59 秒
+            <uni-countdown
+              :second="3"
+              color="#fff"
+              :show-day="false"
+              splitor-color="#fff"
+              :show-colon="false"
+              @timeup="onTimeUp"
+            />
           </view>
           <view class="button">去支付</view>
         </template>

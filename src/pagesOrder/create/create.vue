@@ -4,6 +4,7 @@ import { onLoad, onShow } from '@dcloudio/uni-app'
 import {
   getMemberOrderPreAPI,
   getMemberOrderPreNowAPI,
+  getMemberOrderRepurchaseByIdAPI,
   postMemberOrderAPI,
 } from '@/services/order.ts'
 import type { OrderPreResult } from '@/types/order'
@@ -31,6 +32,7 @@ const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
 const query = defineProps<{
   skuId?: string
   count?: string
+  orderId?: string
 }>()
 //获取预付订单数据
 const orderPre = ref<OrderPreResult>()
@@ -42,6 +44,10 @@ const getMemberOrderPreData = async () => {
       count: query.count,
       skuId: query.skuId,
     })
+    orderPre.value = result.result
+  } else if (query.orderId) {
+    // 再次购买
+    const result = await getMemberOrderRepurchaseByIdAPI(query.orderId)
     orderPre.value = result.result
   } else {
     // 调用预付订单 API
