@@ -89,6 +89,13 @@
         "enablePullDownRefresh": false,
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pagesOrder/list/list",
+      "style": {
+        "navigationBarTitleText": "订单列表",
+        "enablePullDownRefresh": false
+      }
     }
   ],
   "globalStyle": {
