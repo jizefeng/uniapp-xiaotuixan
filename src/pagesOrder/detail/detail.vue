@@ -9,6 +9,7 @@ import {
   getMemberOrderConsignmentByIdAPI,
   getPayMockAPI,
   getPayWxPayMiniPayAPI,
+  putMemberOrderReceiptByIdAPI,
 } from '@/services/order.ts'
 import DetailSkeleton from '@/pagesOrder/detail/componets/DetailSkeleton.vue'
 // 获取屏幕边界到安全区域距离
@@ -106,6 +107,20 @@ const onOrderSend = async () => {
   // 主动更新订单状态
   order.value!.orderState = OrderState.DaiShouHuo
 }
+// 确认收货
+const onOrderConfirm = () => {
+  // 二次确认弹窗
+  uni.showModal({
+    content: '为保障您的权益，请收到货并确认无误后，再确认收货',
+    success: async (success) => {
+      if (success.confirm) {
+        const res = await putMemberOrderReceiptByIdAPI(query.id)
+        // 更新订单状态
+        order.value = res.result
+      }
+    },
+  })
+}
 </script>
 
 <template>
@@ -162,6 +177,14 @@ const onOrderSend = async () => {
               @tap="onOrderSend"
             >
               模拟发货
+            </view>
+            <!-- 待收货状态: 展示确认收货按钮 -->
+            <view
+              v-if="order.orderState === OrderState.DaiShouHuo"
+              @tap="onOrderConfirm"
+              class="button"
+            >
+              确认收货
             </view>
           </view>
         </template>
