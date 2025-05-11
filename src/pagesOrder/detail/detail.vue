@@ -4,7 +4,12 @@ import { ref } from 'vue'
 import XtxGuess from '@/components/XtxGuess.vue'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { type OrderResult, OrderState, orderStateList } from '@/types/order.d'
-import { getMemberOrderByIdAPI, getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/order.ts'
+import {
+  getMemberOrderByIdAPI,
+  getMemberOrderConsignmentByIdAPI,
+  getPayMockAPI,
+  getPayWxPayMiniPayAPI,
+} from '@/services/order.ts'
 import DetailSkeleton from '@/pagesOrder/detail/componets/DetailSkeleton.vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -90,7 +95,16 @@ const onOrderPay = async () => {
     await wx.requestPayment(res.result)
   }
   // 关闭当前页，再跳转支付结果页
-  uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
+  await uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
+}
+// 是否为开发环境
+const isDev = import.meta.env.DEV
+// 模拟发货
+const onOrderSend = async () => {
+  await getMemberOrderConsignmentByIdAPI(query.id)
+  await uni.showToast({ title: '发货成功', icon: 'success' })
+  // 主动更新订单状态
+  order.value!.orderState = OrderState.DaiShouHuo
 }
 </script>
 
@@ -142,7 +156,13 @@ const onOrderPay = async () => {
               再次购买
             </navigator>
             <!-- 待发货状态：模拟发货,开发期间使用,用于修改订单状态为已发货 -->
-            <view v-if="false" class="button"> 模拟发货 </view>
+            <view
+              v-if="isDev && order.orderState == OrderState.DaiFaHuo"
+              class="button"
+              @tap="onOrderSend"
+            >
+              模拟发货
+            </view>
           </view>
         </template>
       </view>
