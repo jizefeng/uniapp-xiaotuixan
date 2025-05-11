@@ -3,10 +3,11 @@ import { useGuessList } from '@/composables'
 import { ref } from 'vue'
 import XtxGuess from '@/components/XtxGuess.vue'
 import { onLoad, onReady } from '@dcloudio/uni-app'
-import { type OrderResult, OrderState, orderStateList } from '@/types/order.d'
+import { type LogisticItem, type OrderResult, OrderState, orderStateList } from '@/types/order.d'
 import {
   getMemberOrderByIdAPI,
   getMemberOrderConsignmentByIdAPI,
+  getMemberOrderLogisticsByIdAPI,
   getPayMockAPI,
   getPayWxPayMiniPayAPI,
   putMemberOrderReceiptByIdAPI,
@@ -76,6 +77,14 @@ const order = ref<OrderResult>()
 const getOrderByIdData = async () => {
   const result = await getMemberOrderByIdAPI(query.id)
   order.value = result.result
+  // 仅在待付款、待收货、待评价状态时，获取物流信息
+  if (
+    [OrderState.DaiFuKuan, OrderState.DaiShouHuo, OrderState.DaiPingJia].includes(
+      order.value.orderState,
+    )
+  ) {
+    await getLogisticData()
+  }
 }
 onLoad(() => {
   getOrderByIdData()
@@ -120,6 +129,12 @@ const onOrderConfirm = () => {
       }
     },
   })
+}
+// 获取物流信息
+const logisticList = ref<LogisticItem[]>([])
+const getLogisticData = async () => {
+  const result = await getMemberOrderLogisticsByIdAPI(query.id)
+  logisticList.value = result.result.list
 }
 </script>
 
@@ -192,16 +207,16 @@ const onOrderConfirm = () => {
       <!-- 配送状态 -->
       <view class="shipment">
         <!-- 订单物流信息 -->
-        <view v-for="item in 1" :key="item" class="item">
+        <view v-for="item in logisticList" :key="item.id" class="item">
           <view class="message">
-            您已在广州市天河区黑马程序员完成取件，感谢使用菜鸟驿站，期待再次为您服务。
+            {{ item.text }}
           </view>
-          <view class="date"> 2023-04-14 13:14:20 </view>
+          <view class="date"> {{ item.time }} </view>
         </view>
         <!-- 用户收货地址 -->
         <view class="locate">
-          <view class="user"> 张三 13333333333 </view>
-          <view class="address"> 广东省 广州市 天河区 黑马程序员 </view>
+          <view class="user">{{ order.receiverContact }} {{ order.receiverMobile }}</view>
+          <view class="address"> {{ order.receiverAddress }}</view>
         </view>
       </view>
 
