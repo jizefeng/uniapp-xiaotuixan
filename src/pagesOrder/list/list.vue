@@ -11,18 +11,26 @@ const orderTabs = ref([
   { orderState: 3, title: '待收货' },
   { orderState: 4, title: '待评价' },
 ])
+const activateIndex = ref(0)
 </script>
 
 <template>
   <view class="viewport">
     <!-- tabs -->
     <view class="tabs">
-      <text class="item" v-for="item in 5" :key="item"> 待付款 </text>
+      <text
+        class="item"
+        v-for="(item, index) in orderTabs"
+        :key="item.title"
+        @tap="activateIndex = index"
+      >
+        {{ item.title }}
+      </text>
       <!-- 游标 -->
-      <view class="cursor" :style="{ left: 0 * 20 + '%' }"></view>
+      <view class="cursor" :style="{ left: activateIndex * 20 + '%' }"></view>
     </view>
     <!-- 滑动容器 -->
-    <swiper class="swiper">
+    <swiper class="swiper" @change="activateIndex = $event.detail.current" :current="activateIndex">
       <!-- 滑动项 -->
       <swiper-item v-for="item in 5" :key="item">
         <!-- 订单列表 -->
