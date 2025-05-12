@@ -3,6 +3,9 @@ import { ref } from 'vue'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+const query = defineProps<{
+  type: string
+}>()
 // tabs 数据
 const orderTabs = ref([
   { orderState: 0, title: '全部' },
@@ -11,7 +14,8 @@ const orderTabs = ref([
   { orderState: 3, title: '待收货' },
   { orderState: 4, title: '待评价' },
 ])
-const activateIndex = ref(0)
+// 高亮下标
+const activeIndex = ref(orderTabs.value.findIndex((v) => v.orderState === Number(query.type)))
 </script>
 
 <template>
@@ -22,15 +26,15 @@ const activateIndex = ref(0)
         class="item"
         v-for="(item, index) in orderTabs"
         :key="item.title"
-        @tap="activateIndex = index"
+        @tap="activeIndex = index"
       >
         {{ item.title }}
       </text>
       <!-- 游标 -->
-      <view class="cursor" :style="{ left: activateIndex * 20 + '%' }"></view>
+      <view class="cursor" :style="{ left: activeIndex * 20 + '%' }"></view>
     </view>
     <!-- 滑动容器 -->
-    <swiper class="swiper" @change="activateIndex = $event.detail.current" :current="activateIndex">
+    <swiper class="swiper" @change="activeIndex = $event.detail.current" :current="activeIndex">
       <!-- 滑动项 -->
       <swiper-item v-for="item in 5" :key="item">
         <!-- 订单列表 -->
